@@ -45,7 +45,7 @@
 					},
 					'password': {
 						type: 'string',
-						required: true,
+						required: false,
 						message: '请输入密码',
 						trigger: ['blur', 'change']
 					},
@@ -57,10 +57,12 @@
 				this.$refs.uForm.validate().then(res => {
 					uni.request({
 						// url:"http://192.168.100.4:3000/test",
-						url:"http://192.168.100.4:3000/test1",
-						// url:"http://192.168.1.54:3000/test",
-						data:{},
-						method:"GET",
+						// url:"http://192.168.100.4:3000/test1",
+						url:"http://192.168.1.15:3000/mail",
+						data:{
+							mail: this.userInfo.account
+						},
+						method:"POST",
 						success:(res)=>{
 							console.log(res)
 						}
