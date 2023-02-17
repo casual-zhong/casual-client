@@ -1,14 +1,13 @@
 <template>
-	<view class="signin">
+	<view class="signup">
 		<view class="top-bar">
 			<view class="top-bar-left">
-				<image src="../../static/images/img/four.jpg"></image>
+				<i class="iconfont icon-xiangzuo1"></i>
 			</view>
 			<view class="top-bar-center">
-				<image src="../../static/images/index/logo.png"></image>
 			</view>
 			<view class="top-bar-right">
-				<image src="../../static/images/index/add.png"></image>
+				<i class="iconfont icon-cuowuguanbiquxiao"></i>
 			</view>
 		</view>
 		<view class="bottom-content">
@@ -98,7 +97,7 @@
 </script>
 
 <style lang="scss">
-.signin{
+.signup{
 	width: 100vw;
 	height: 100vh;
 	// padding-top: var(--status-bar-height);
@@ -122,6 +121,9 @@
 			image {
 				width: 60rpx;
 				height: 60rpx;
+			}
+			i{
+				font-size: 25px;
 			}
 			&.top-bar-center{
 				justify-content: center;
