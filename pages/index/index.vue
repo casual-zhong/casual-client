@@ -13,6 +13,7 @@
 			</view>
 		</view>
 		<view class="bottom-content">
+			<u-notice-bar :text="notice"></u-notice-bar>
 			<view class="content-item" v-for="item in 15" :key="item">
 				<view class="item-image">
 					<image src="../../static/images/img/p.png" mode=""></image>					
@@ -34,7 +35,7 @@
 	export default {
 		data() {
 			return {
-				
+				notice:'所有人大老大是考虑到哈沙龙狮大会拉胯汉兰达开始拉都说了卡号了看'
 			}
 		},
 		onLoad() {

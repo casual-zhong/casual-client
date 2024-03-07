@@ -1,30 +1,36 @@
 <template>
 	<view class="signup">
 		<view class="top-bar">
-			<view class="top-bar-left">
+			<view class="top-bar-left" @tap="toSignin">
 				<i class="iconfont icon-xiangzuo1"></i>
 			</view>
 			<view class="top-bar-center">
-			</view>
+			</view>	
 			<view class="top-bar-right">
 				<i class="iconfont icon-cuowuguanbiquxiao"></i>
 			</view>
 		</view>
 		<view class="bottom-content">
 			<image src="../../static/images/index/logo.png"></image>
-			<text class="content_title">登录</text>
-			<text class="content_describe">您好，欢迎登录！</text>
+			<text class="content_title">注册</text>
 			<u--form labelPosition="top" :model="userInfo" :rules="rules" ref="uForm" :labelStyle="{color:'#b7b7b7'}">
 				<u-form-item label="账号" prop="account" borderBottom>
 					<u--input v-model="userInfo.account" border="none"></u--input>
+				</u-form-item>
+				<u-form-item label="邮箱" prop="email" borderBottom>
+					<u--input v-model="userInfo.email" type="text" border="none"></u--input>
 				</u-form-item>
 				<u-form-item label="密码" prop="password" borderBottom>
 					<u--input v-model="userInfo.password" :type="passwordShow?'text':'password'" border="none"></u--input>
 					<i slot="right" :class="['iconfont',passwordShow?'icon-zhengyan':'icon-biyanjing']" style="font-size: 20px;" @click="passwordShow=!passwordShow"></i>
 				</u-form-item>
+				<u-form-item label="密码" prop="password1" borderBottom>
+					<u--input v-model="userInfo.password1" :type="passwordShow1?'text':'password'" border="none"></u--input>
+					<i slot="right" :class="['iconfont',passwordShow1?'icon-zhengyan':'icon-biyanjing']" style="font-size: 20px;" @click="passwordShow1=!passwordShow1"></i>
+				</u-form-item>
 			</u--form>
 			<view class="submit_buttons">
-				<u-button text="登录" class="submit_button" color="linear-gradient(to right,#ffef84,#ffe431 )" @click="submit"></u-button>
+				<u-button text="注册" class="submit_button" color="linear-gradient(to right,#ffef84,#ffe431 )" @click="submit"></u-button>
 				<view class="buttons_text">
 					<text>忘记密码</text>
 					<text class="text_right">注册账号</text>
@@ -41,13 +47,21 @@
 			return {
 				userInfo:{
 					account:'',
-					password:''
+					email:'',
+					password:'',
+					password1:''
 				},
 				rules: {
 					'account': {
 						type: 'string',
 						required: true,
 						message: '请输入账号',
+						trigger: ['blur', 'change']
+					},
+					'email': {
+						type: 'email',
+						required: true,
+						message: '请输入邮箱',
 						trigger: ['blur', 'change']
 					},
 					'password':[
@@ -68,9 +82,24 @@
 							max: 8,
 							message: '长度在6-8个字符之间'
 						}
+					],
+					'password1':[
+						{
+							type: 'string',
+							required: true,	
+							message: '请再次输入密码',
+							trigger: ['blur', 'change']
+						},{
+							validator: (rule, value, callback) => {
+								return this.userInfo.password==value;
+							},
+							message: '两次输入的密码不一致',
+							trigger: ['change','blur'],
+						}
 					]
 				},
-				passwordShow:false
+				passwordShow:false,
+				passwordShow1:false
 			};
 		},
 		methods:{
@@ -91,6 +120,9 @@
 				}).catch(errors => {
 					uni.$u.toast('校验失败')
 				})
+			},
+			toSignin(){
+				uni.navigateBack();
 			}
 		}
 	}
@@ -155,11 +187,6 @@
 			font-size: 28px;
 			color: #272832;
 			font-weight: 500;
-		}
-		.content_describe{
-			font-size: 20px;
-			color: rgba(39,40,50,0.50);
-			margin: 10px 0;
 		}
 	}
 	.submit_buttons{

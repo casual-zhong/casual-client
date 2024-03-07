@@ -28,7 +28,7 @@
 				<u-button text="登录" class="submit_button" color="linear-gradient(to right,#ffef84,#ffe431 )" @click="submit"></u-button>
 				<view class="buttons_text">
 					<text>忘记密码</text>
-					<text class="text_right">注册账号</text>
+					<text class="text_right" @click="toSignUp">注册账号</text>
 				</view>
 			</view>
 
@@ -91,6 +91,11 @@
 					})
 				}).catch(errors => {
 					uni.$u.toast('校验失败')
+				})
+			},
+			toSignUp(){
+				uni.navigateTo({
+					url:"../signup/signup"
 				})
 			}
 		}
