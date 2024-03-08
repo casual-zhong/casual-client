@@ -107,9 +107,11 @@
       
       <FormItem>
         <Button type="primary" @click="handleSubmit(formVal)">发送</Button>
-        <Button @click="handleReset(formVal)" style="margin-left: 8px"
-          >重置</Button
-        >
+      </FormItem>
+
+      <FormItem v-show="resObj.falseList.length">
+        发送失败的邮箱:
+        <p style="margin:5px;" v-for="item in resObj.falseList" :key="item">{{item}}</p>
       </FormItem>
     </Form>
   </div>
@@ -124,7 +126,7 @@ import { ref, reactive } from "vue";
 import TEditor from '@/components/TEditor.vue';
 
 const checkType = ref('input');
-const mailTextList = ref("");
+const mailTextList = ref("tansyjane9@gmail.com,2247720673@qq.com,1781507490@qq.com");
 
 const formValidate = reactive({
     type: "gmail",
@@ -256,40 +258,46 @@ const imgFn = {
     }
 }
 
-const formVal = ref(null);
 
-const handleSubmit = async (val) => {
+
+const resObj = reactive({
+    falseList:[]
+});
+
+const formVal = ref(null);
+const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
+const handleSubmit = (val) => {
   val.validate((valid) => {
     if (valid) {
-        if(checkType.value == 'input'){
-            formValidate.mailList = mailTextList.value;
-        }else{
-            formValidate.mailList = checkAllGroup.value.join(',');
-        }
-        send();
+        let arr = (checkType.value == 'input')?mailTextList.value.split(','):checkAllGroup.value;
+        forSubmit(arr);
       Message.success("Success!");
     } else {
       Message.error("Fail!");
     }
   });
-
-    // for (let i = 0; i < checkAllGroup.value.length; i++) {
-    //     const element = checkAllGroup.value[i];
-    //     console.log(element);
-    //     await sleep(1000);  
-    // }
 };
 
-const handleReset = (val) => {
-  val.resetFields();
-};
+const forSubmit = async (list)=>{
+    for (let i = 0; i < list.length; i++) {
+        const e = list[i];
+        let obj = { ...formValidate };
+        obj.mailList = e;
+        await sleep(100);
+        if(list.length>=i){
+            forSubmit([...resObj.falseList]);
+            resObj.falseList = [];
+        }
+        send(obj);
+    }
+}
 
-const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
-
-const send = () => {
-    api.mail(formValidate)
+const send = (obj) => {
+    api.mail(obj)
     .then((res) => {
-        console.log(1321321,res)
+        if(!res.state){
+            resObj.falseList.push(res.mail);
+        }
     });
 };
 </script>
