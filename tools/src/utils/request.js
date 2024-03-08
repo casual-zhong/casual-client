@@ -4,7 +4,7 @@ import axios from "axios";
 //创建一个新的请求实例instance,instance.的用法和axios.的用法一致，可以使用instance({})、instance.get（）、instance.post()
 const instace = axios.create({
   baseURL: import.meta.env.VITE_API_URL, //默认配置(这里不要用process.env,个人百度这个在vite中被废弃掉了,属性名必须以VITE_API_开头,否则 import.meta.env检测不到)
-  timeout: 5000, //超时时间
+  timeout: 50000, //超时时间
 });
 
 //配置请求拦截器,在请求之前的数据处理,比如在请求头添加token,所有的请求都会经过拦截器

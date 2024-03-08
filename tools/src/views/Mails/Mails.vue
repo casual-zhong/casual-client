@@ -6,11 +6,16 @@
       :rules="ruleValidate"
       :label-width="100"
     >
-
+        <FormItem label="内置发件人" prop="type">
+            <RadioGroup v-model="builtIn" @on-change="changeBuiltIn">
+                <Radio v-for="item in builtInList" :label="item.name">{{item.name}}</Radio>
+                <!-- <Radio label="tansyjane9@gmail.com">tansyjane9@gmail.com</Radio> -->
+            </RadioGroup>
+        </FormItem>
         <FormItem label="邮箱类型" prop="type">
             <RadioGroup v-model="formValidate.type">
-            <Radio label="gmail">Gmail</Radio>
-            <!-- <Radio label="qq">QQ</Radio> -->
+                <Radio label="gmail">Gmail</Radio>
+                <!-- <Radio label="qq">QQ</Radio> -->
             </RadioGroup>
         </FormItem>
         <Row>
@@ -23,14 +28,22 @@
                 </FormItem>
             </Col>
             <Col span="12">
-                <FormItem label="邮箱授权码" prop="authName">
+                <FormItem label="邮箱授权码" prop="authVal">
                     <Input v-model="formValidate.authVal" placeholder="邮箱授权码"></Input>
                 </FormItem>
             </Col>
         </Row>
 
         <FormItem label="接收人邮件" prop="type">
+
+            <RadioGroup v-model="checkType">
+                <Radio label="input">手动输入</Radio>
+                <Radio label="upload">文件上传</Radio>
+            </RadioGroup>
+
             <Upload 
+            style="margin-top:10px;"
+            v-if="checkType=='upload'"
             action="*"
             accept=".txt"
             :before-upload="onProgress"
@@ -38,7 +51,12 @@
                 <Button icon="ios-cloud-upload-outline">选择文件</Button>
             </Upload>
         </FormItem>
-        <FormItem label="Checkbox" v-show="mailList.length">
+        
+        <FormItem label="收件人邮箱" v-show="checkType=='input'">
+            <Input v-model="mailTextList" type="textarea" :rows="4" placeholder="请输入接收人邮箱，多个用逗号(',')隔开" />   
+        </FormItem>
+
+        <FormItem label="收件人邮箱" v-show="checkType=='upload'&&mailList.length">
             <Checkbox
             :indeterminate="indeterminate"
             :model-value="checkAll"
@@ -56,8 +74,8 @@
 
         <Row>
             <Col span="12">
-                <FormItem label="subject" prop="subject">
-                    <Input v-model="formValidate.subject" placeholder="请输入标题"></Input>
+                <FormItem label="主题" prop="subject">
+                    <Input v-model="formValidate.subject" placeholder="请输入主题"></Input>
                 </FormItem>
             </Col>
             <Col span="12">
@@ -70,7 +88,6 @@
                         :show-upload-list="false"
                         :format="['jpg','jpeg','png']"
                         :max-size="2048"
-                        :on-exceeded-size="imgFn.handleMaxSize"
                         :before-upload="imgFn.handleBeforeUpload"
                         multiple
                         type="drag"
@@ -84,7 +101,9 @@
             </Col>
         </Row>
       
-      
+      <FormItem label="内容">
+        <TEditor style="width:100%;height:500px;" ref="editor" v-model="formValidate.content" />
+      </FormItem>
       
       <FormItem>
         <Button type="primary" @click="handleSubmit(formVal)">发送</Button>
@@ -102,13 +121,19 @@
 import api from "@/api/index.js";
 import { ref, reactive } from "vue";
 
+import TEditor from '@/components/TEditor.vue';
+
+const checkType = ref('input');
+const mailTextList = ref("");
+
 const formValidate = reactive({
     type: "gmail",
     authName:"",
     authVal:"",
     mailList: "",
     subject:"",
-    img:""
+    imgUrl:"",
+    content:""
 });
 
 const ruleValidate = reactive({
@@ -118,23 +143,24 @@ const ruleValidate = reactive({
   ],
 });
 
-const formVal = ref(null);
+// 内置发件人
+const builtInList = [{
+    name:"tansyqin9@gmail.com",
+    value:"lwcjqpvkyiqhrqvr"
+},{
+    name:"tansyjane9@gmail.com",
+    value:"weglvmaplckugcrk"
+}]
+const builtIn = ref("");
+const changeBuiltIn = (e)=>{
+    let item = builtInList.find(v=>v.name==e);
+    formValidate.authName = item.name; 
+    formValidate.authVal = item.value;
+}
 
-const handleSubmit = (val) => {
-  val.validate((valid) => {
-    if (valid) {
-      Message.success("Success!");
-    } else {
-      Message.error("Fail!");
-    }
-  });
-};
 
-const handleReset = (val) => {
-  val.resetFields();
-};
 
-const indeterminate = ref(true)
+const indeterminate = ref(false)
 const checkAll = ref(false)
 const checkAllGroup = ref([])
 const mailList = ref([])
@@ -186,23 +212,16 @@ const imgUrl = ref("");
 const uploadImg = ref(null);
 
 const imgFn = {
-    handleView (name) {
-        // this.imgName = name;
-        // this.visible = true;
-    },
     handleRemove (file) {
         const fileList = uploadImg.value.fileList;
         uploadImg.value.fileList.splice(fileList.indexOf(file), 1);
     },
-    handleMaxSize (file) {
-        Notice.warning({
-            title: 'Exceeding file size limit',
-            desc: 'File  ' + file.name + ' is too large, no more than 2M.'
-        });
-    },
     handleBeforeUpload (file) {
+        // 获取文件路径
+        // formValidate.imgUrl = URL.createObjectURL(file);
         imgFn.photoCompress(file,(e)=>{
-            imgUrl.value = e
+            imgUrl.value = e;
+            formValidate.imgUrl = e;
         })
     },
     photoCompress(file, callback) {
@@ -237,12 +256,41 @@ const imgFn = {
     }
 }
 
+const formVal = ref(null);
+
+const handleSubmit = async (val) => {
+  val.validate((valid) => {
+    if (valid) {
+        if(checkType.value == 'input'){
+            formValidate.mailList = mailTextList.value;
+        }else{
+            formValidate.mailList = checkAllGroup.value.join(',');
+        }
+        send();
+      Message.success("Success!");
+    } else {
+      Message.error("Fail!");
+    }
+  });
+
+    // for (let i = 0; i < checkAllGroup.value.length; i++) {
+    //     const element = checkAllGroup.value[i];
+    //     console.log(element);
+    //     await sleep(1000);  
+    // }
+};
+
+const handleReset = (val) => {
+  val.resetFields();
+};
+
+const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay));
+
 const send = () => {
-  api
-    .mail({
-      mail: "tansyjane9@gmail.com",
-    })
-    .then((res) => {});
+    api.mail(formValidate)
+    .then((res) => {
+        console.log(1321321,res)
+    });
 };
 </script>
 
