@@ -110,8 +110,16 @@
       </FormItem>
 
       <FormItem v-show="resObj.falseList.length">
-        发送失败的邮箱:
-        <p style="margin:5px;" v-for="item in resObj.falseList" :key="item">{{item}}</p>
+        <div class="resList">
+            <div class="item">
+                发送失败的邮箱:
+                <p style="margin:5px;" v-for="item in resObj.falseList" :key="item">{{item}}</p>
+            </div>
+            <div class="item">
+                发送成功的邮箱:
+                <p style="margin:5px;" v-for="item in resObj.trueList" :key="item">{{item}}</p>
+            </div>
+        </div>
       </FormItem>
     </Form>
   </div>
@@ -133,7 +141,7 @@ const formValidate = reactive({
     authName:"",
     authVal:"",
     mailList: "",
-    subject:"",
+    subject:"RE: New Cooperation chance ! Don't miss out on all new arrivals of Dog Shock Collar",
     imgUrl:"",
     content:""
 });
@@ -152,6 +160,9 @@ const builtInList = [{
 },{
     name:"tansyjane9@gmail.com",
     value:"weglvmaplckugcrk"
+},{
+    name:"destriepat@gmail.com",
+    value:"bspvzzpysvehgojw"
 }]
 const builtIn = ref("");
 const changeBuiltIn = (e)=>{
@@ -261,6 +272,7 @@ const imgFn = {
 
 
 const resObj = reactive({
+    trueList:[],
     falseList:[]
 });
 
@@ -283,11 +295,11 @@ const forSubmit = async (list)=>{
         const e = list[i];
         let obj = { ...formValidate };
         obj.mailList = e;
-        await sleep(100);
-        if(list.length>=i){
-            forSubmit([...resObj.falseList]);
-            resObj.falseList = [];
-        }
+        await sleep(10000);
+        // if(list.length>=i){
+        //     forSubmit([...resObj.falseList]);
+        //     resObj.falseList = [];
+        // }
         send(obj);
     }
 }
@@ -295,8 +307,11 @@ const forSubmit = async (list)=>{
 const send = (obj) => {
     api.mail(obj)
     .then((res) => {
-        if(!res.state){
-            resObj.falseList.push(res.mail);
+        console.log(res.data.mail+':=>',res)
+        if(!res.data.state){
+            resObj.falseList.push(res.data.mail);
+        }else{
+            resObj.trueList.push(res.data.mail);
         }
     });
 };
@@ -321,5 +336,14 @@ const send = (obj) => {
 .demo-upload-list img{
     width: 100%;
     height: 100%;
+}
+.resList{
+    width: 100%;
+    min-height: 100%;
+    display: flex;
+    align-content: flex-start;
+    .item{
+        width: 50%;
+    }
 }
 </style>
