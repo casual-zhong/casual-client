@@ -107,6 +107,7 @@
       
       <FormItem>
         <Button type="primary" @click="handleSubmit(formVal)">发送</Button>
+        <Checkbox style="margin-left:20px;" v-model="single">是否循环切换账号发送</Checkbox>
       </FormItem>
 
       <FormItem v-show="resObj.falseList.length">
@@ -165,6 +166,7 @@ const builtInList = [{
     value:"pgrlemklwliwollu"
 }]
 const builtIn = ref("");
+const single = ref(true);
 const changeBuiltIn = (e)=>{
     let item = builtInList.find(v=>v.name==e);
     formValidate.authName = item.name; 
@@ -290,29 +292,44 @@ const handleSubmit = (val) => {
   });
 };
 
+let activeIndex = 0;
 const forSubmit = async (list)=>{
     for (let i = 0; i < list.length; i++) {
         const e = list[i];
         let obj = { ...formValidate };
         obj.mailList = e;
-        send(obj);
-        await sleep(10000);
-        // if(list.length>=i){
-        //     forSubmit([...resObj.falseList]);
-        //     resObj.falseList = [];
-        // }
+        if(single.value){
+            if(activeIndex>2) activeIndex = 0;
+            let item = builtInList[activeIndex++];
+            obj.authName = item.name; 
+            obj.authVal = item.value;
+        }
+        console.log('obj',obj);
+        console.log('activeIndex',activeIndex);
+        // send(obj);
+        await sleep(3000);
+        
+        if(list.length<=(i+1)){
+            console.log('发送失败的邮箱',falseObj)
+            // forSubmit([...resObj.falseList]);
+            // resObj.falseList = [];
+        }
     }
 }
 
+let falseIndex = 0;
+let falseObj = {};
 const send = (obj) => {
     api.mail(obj)
     .then((res) => {
         if(!res.data.state){
             console.error(res.data.mail+':=>',res.data.message)
-            resObj.falseList.push(res.data.mail);
+            // resObj.falseList.push(res.data.mail);
+            if(!falseObj[res.data.authVal]?.length) falseObj[res.data.authVal] = [];
+            falseObj[res.data.authVal].push(res.data.mail);
         }else{
             console.log(res.data.mail+':=>',res.data.message)
-            resObj.trueList.push(res.data.mail);
+            // resObj.trueList.push(res.data.mail);
         }
     });
 };
