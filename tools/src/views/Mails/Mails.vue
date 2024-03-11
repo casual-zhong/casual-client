@@ -162,7 +162,7 @@ const builtInList = [{
     value:"weglvmaplckugcrk"
 },{
     name:"destriepat@gmail.com",
-    value:"bspvzzpysvehgojw"
+    value:"pgrlemklwliwollu"
 }]
 const builtIn = ref("");
 const changeBuiltIn = (e)=>{
@@ -295,22 +295,23 @@ const forSubmit = async (list)=>{
         const e = list[i];
         let obj = { ...formValidate };
         obj.mailList = e;
+        send(obj);
         await sleep(10000);
         // if(list.length>=i){
         //     forSubmit([...resObj.falseList]);
         //     resObj.falseList = [];
         // }
-        send(obj);
     }
 }
 
 const send = (obj) => {
     api.mail(obj)
     .then((res) => {
-        console.log(res.data.mail+':=>',res)
         if(!res.data.state){
+            console.error(res.data.mail+':=>',res.data.message)
             resObj.falseList.push(res.data.mail);
         }else{
+            console.log(res.data.mail+':=>',res.data.message)
             resObj.trueList.push(res.data.mail);
         }
     });
