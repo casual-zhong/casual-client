@@ -144,7 +144,8 @@ const formValidate = reactive({
     mailList: "",
     subject:"RE: New Cooperation chance ! Don't miss out on all new arrivals of Dog Shock Collar",
     imgUrl:"",
-    content:""
+    content:"",
+    fileName:""
 });
 
 const ruleValidate = reactive({
@@ -180,7 +181,6 @@ const checkAll = ref(false)
 const checkAllGroup = ref([])
 const mailList = ref([])
 const onProgress = (file)=>{
-    console.log('file',file)
     let reader = new FileReader();
     reader.readAsText(file, 'UTF-8');
     reader.onload = (event) => {
@@ -234,6 +234,7 @@ const imgFn = {
     handleBeforeUpload (file) {
         // 获取文件路径
         // formValidate.imgUrl = URL.createObjectURL(file);
+        formValidate.fileName = file.name;
         imgFn.photoCompress(file,(e)=>{
             imgUrl.value = e;
             formValidate.imgUrl = e;
@@ -284,7 +285,11 @@ const handleSubmit = (val) => {
   val.validate((valid) => {
     if (valid) {
         let arr = (checkType.value == 'input')?mailTextList.value.split(','):checkAllGroup.value;
-        forSubmit(arr);
+        // let times = 1000 * 60 * 60 * 1;
+        let times = 0;
+        setTimeout(()=>{
+            forSubmit(arr);
+        },times)
       Message.success("Success!");
     } else {
       Message.error("Fail!");
@@ -293,7 +298,9 @@ const handleSubmit = (val) => {
 };
 
 let activeIndex = 0;
+let falseArr = [];
 const forSubmit = async (list)=>{
+    falseArr = [];
     for (let i = 0; i < list.length; i++) {
         const e = list[i];
         let obj = { ...formValidate };
@@ -304,32 +311,26 @@ const forSubmit = async (list)=>{
             obj.authName = item.name; 
             obj.authVal = item.value;
         }
-        console.log('obj',obj);
-        console.log('activeIndex',activeIndex);
-        // send(obj);
-        await sleep(3000);
-        
-        if(list.length<=(i+1)){
-            console.log('发送失败的邮箱',falseObj)
-            // forSubmit([...resObj.falseList]);
-            // resObj.falseList = [];
+        send(obj);
+        await sleep(5000);
+
+        if(list.length<=(i+1) && falseArr.length){
+            console.log('发送失败的邮箱',falseArr)
+            forSubmit(falseArr);
         }
     }
 }
 
-let falseIndex = 0;
-let falseObj = {};
+
 const send = (obj) => {
     api.mail(obj)
     .then((res) => {
+        console.log('asfasf',res)
         if(!res.data.state){
             console.error(res.data.mail+':=>',res.data.message)
-            // resObj.falseList.push(res.data.mail);
-            if(!falseObj[res.data.authVal]?.length) falseObj[res.data.authVal] = [];
-            falseObj[res.data.authVal].push(res.data.mail);
+            falseArr.push(res.data.mail);
         }else{
             console.log(res.data.mail+':=>',res.data.message)
-            // resObj.trueList.push(res.data.mail);
         }
     });
 };

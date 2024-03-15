@@ -17,7 +17,8 @@ export default defineConfig({
     proxy: {
       "/api": {
         //target是代理的目标路径
-        target: "http://192.168.1.12:3000",
+        // target: "http://192.168.1.12:3000",
+        target: "http://47.245.93.16:81",
         changeOrigin: true, //必须要开启跨域
         //pathRewrite重写请求的路径,实际请求的路径没有代理标识api,需要把斗鱼重置为空字符串
         rewrite: (path) => path.replace(/\/api/, ""), // 路径重写
