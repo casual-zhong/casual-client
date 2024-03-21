@@ -165,9 +165,12 @@ const builtInList = [{
 },{
     name:"destriepat@gmail.com",
     value:"pgrlemklwliwollu"
+},{
+    name:"cjyfuhltxsqea@gmail.com",
+    value:"mieelnvgyscaoswm"
 }]
-const builtIn = ref("");
 const single = ref(true);
+const builtIn = ref("");
 const changeBuiltIn = (e)=>{
     let item = builtInList.find(v=>v.name==e);
     formValidate.authName = item.name; 
@@ -306,13 +309,13 @@ const forSubmit = async (list)=>{
         let obj = { ...formValidate };
         obj.mailList = e;
         if(single.value){
-            if(activeIndex>2) activeIndex = 0;
+            if(activeIndex>1) activeIndex = 0;
             let item = builtInList[activeIndex++];
             obj.authName = item.name; 
             obj.authVal = item.value;
         }
         send(obj);
-        await sleep(5000);
+        await sleep(30000);
 
         if(list.length<=(i+1) && falseArr.length){
             console.log('发送失败的邮箱',falseArr)
@@ -325,7 +328,7 @@ const forSubmit = async (list)=>{
 const send = (obj) => {
     api.mail(obj)
     .then((res) => {
-        console.log('asfasf',res)
+        //console.log('asfasf',res)
         if(!res.data.state){
             console.error(res.data.mail+':=>',res.data.message)
             falseArr.push(res.data.mail);
